@@ -11,24 +11,27 @@ export const colors = {
   white: "#FFFFFF",
   textMuted: "#8A8580", // caption / subtitle grisi
   border: "#E8E0D8",
+  cardAlt: "#EADFD3", // ← ekle
+  sageLight: "#B8D4B0", // ← ekle, koyu zeminlerde kontrast için
 } as const;
 
 export type ThemeColor = keyof typeof colors;
 
 export const typography = {
-  display: { fontSize: 32, fontWeight: "700" as const },
-  h1: { fontSize: 24, fontWeight: "700" as const },
-  h2: { fontSize: 20, fontWeight: "600" as const },
-  h3: { fontSize: 18, fontWeight: "600" as const },
-  bodyLarge: { fontSize: 16, fontWeight: "500" as const },
-  body: { fontSize: 14, fontWeight: "400" as const },
-  caption: { fontSize: 12, fontWeight: "500" as const },
+  display: { fontSize: 32, fontFamily: "PlusJakartaSans_800ExtraBold" },
+  h1: { fontSize: 24, fontFamily: "PlusJakartaSans_700Bold" },
+  h2: { fontSize: 20, fontFamily: "PlusJakartaSans_600SemiBold" },
+  h3: { fontSize: 18, fontFamily: "PlusJakartaSans_600SemiBold" },
+  bodyLarge: { fontSize: 16, fontFamily: "PlusJakartaSans_500Medium" },
+  body: { fontSize: 14, fontFamily: "PlusJakartaSans_400Regular" },
+  caption: { fontSize: 12, fontFamily: "PlusJakartaSans_500Medium" },
   overline: {
     fontSize: 11,
-    fontWeight: "600" as const,
+    fontFamily: "PlusJakartaSans_600SemiBold",
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
   },
+  amount: { fontFamily: "PlusJakartaSans_700Bold" }, // tutarlar için - kurala göre Bold/ExtraBold
 };
 
 export const spacing = {

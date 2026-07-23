@@ -1,64 +1,65 @@
+import AddTransactionSheet from "@/components/ui/add-transaction";
+import { CustomTabBar } from "@/components/ui/tab-bar";
 import { colors } from "@/constants/theme";
-import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { BlurView } from "expo-blur";
+import { useFonts } from "expo-font";
+import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Modal, Pressable, StyleSheet, View } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [addVisible, setAddVisible] = useState(false);
+
+  const [fontsLoaded] = useFonts({
+    PlusJakartaSans_300Light: require("../../assets/fonts/PlusJakartaSans-Light.ttf"),
+    PlusJakartaSans_400Regular: require("../../assets/fonts/PlusJakartaSans-Regular.ttf"),
+    PlusJakartaSans_500Medium: require("../../assets/fonts/PlusJakartaSans-Medium.ttf"),
+    PlusJakartaSans_600SemiBold: require("../../assets/fonts/PlusJakartaSans-SemiBold.ttf"),
+    PlusJakartaSans_700Bold: require("../../assets/fonts/PlusJakartaSans-Bold.ttf"),
+    PlusJakartaSans_800ExtraBold: require("../../assets/fonts/PlusJakartaSans-ExtraBold.ttf"),
+  });
+
   useEffect(() => {
-    SplashScreen.hideAsync();
-  }, []);
+    if (fontsLoaded) SplashScreen.hideAsync();
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) return null;
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.terracotta,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: {
-          backgroundColor: colors.white,
-          borderTopColor: colors.border,
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Ana Sayfa",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="transactions"
-        options={{
-          title: "İşlemler",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="swap-horizontal" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="summary"
-        options={{
-          title: "Özet",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="pie-chart" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profil",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" color={color} size={size} />
-          ),
-        }}
-      />
-    </Tabs>
+    <View style={{ flex: 1, backgroundColor: colors.sand }}>
+      <Slot />
+      <CustomTabBar onAddPress={() => setAddVisible(true)} />
+
+      <Modal
+        visible={addVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setAddVisible(false)}
+      >
+        <Pressable style={{ flex: 1 }} onPress={() => setAddVisible(false)}>
+          <BlurView intensity={25} tint="dark" style={styles.backdrop}>
+            <Pressable
+              style={styles.sheetWrapper}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <AddTransactionSheet onClose={() => setAddVisible(false)} />
+            </Pressable>
+          </BlurView>
+        </Pressable>
+      </Modal>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  sheetWrapper: {
+    // AddTransactionSheet kendi padding/radius'unu taşıyor, burada ekstra bir şeye gerek yok
+  },
+});
