@@ -4,7 +4,7 @@ import { CustomTabBar } from "@/components/ui/tab-bar";
 import { colors } from "@/constants/theme";
 import { useFonts } from "expo-font";
 import { LinearGradient } from "expo-linear-gradient";
-import { Slot, useRouter, useSegments } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
@@ -56,13 +56,13 @@ function RootLayoutContent() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.sand }}>
-      <Slot />
+      <Stack screenOptions={{ headerShown: false, animation: "none" }} />
       {isAuthenticated && <CustomTabBar />}
 
       <Modal
         visible={visible}
         transparent
-        animationType="slide"
+        animationType="fade"
         onRequestClose={close}
       >
         <Pressable style={styles.backdrop} onPress={close}>

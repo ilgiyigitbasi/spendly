@@ -1,5 +1,6 @@
 import { api } from "@/api/client";
 import { Chip } from "@/components/ui/chip";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Logo } from "@/components/ui/logo";
 import { TransactionItem } from "@/components/ui/transaction-item";
 import {
@@ -126,7 +127,10 @@ export default function TransactionsScreen() {
         </View>
 
         {filtered.length === 0 ? (
-          <Text style={styles.emptyText}>Sonuç bulunamadı.</Text>
+          <EmptyState
+            title="İşlem bulunamadı"
+            subtitle="Aramanıza veya filtrelerinize uyan işlem yok"
+          />
         ) : (
           filtered.map((tx) => (
             <TransactionItem
