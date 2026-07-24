@@ -1,12 +1,22 @@
 import { colors, radius, spacing, typography } from "@/constants/theme";
+import { Ionicons } from "@expo/vector-icons";
+import { useRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import Animated, {
+    Extrapolation,
+    interpolate,
+    SharedValue,
+    useAnimatedStyle,
+} from "react-native-reanimated";
 
 interface TransactionItemProps {
-  icon: string; // emoji, örn. "🛒"
-  title: string; // "Migros Market"
-  subtitle: string; // "Bugün, 12:40 • Mutfak"
+  icon: string;
+  title: string;
+  subtitle: string;
   amount: number;
   type: "income" | "expense";
+  onDelete?: () => void;
 }
 
 export function TransactionItem({
@@ -15,18 +25,48 @@ export function TransactionItem({
   subtitle,
   amount,
   type,
+  onDelete,
 }: TransactionItemProps) {
+  const swipeableRef = useRef<React.ComponentRef<typeof Swipeable>>(null);
   const isExpense = type === "expense";
   const formatted =
     "₺" +
     Math.abs(amount).toLocaleString("tr-TR", { minimumFractionDigits: 2 });
 
-  return (
+  const renderRightActions = (progress: SharedValue<number>) => {
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [
+        {
+          scale: interpolate(
+            progress.value,
+            [0, 1],
+            [0.6, 1],
+            Extrapolation.CLAMP,
+          ),
+        },
+      ],
+    }));
+
+    return (
+      <Animated.View style={[styles.deleteAction, animatedStyle]}>
+        <Ionicons
+          name="trash-outline"
+          size={20}
+          color={colors.white}
+          onPress={() => {
+            swipeableRef.current?.close();
+            onDelete?.();
+          }}
+        />
+      </Animated.View>
+    );
+  };
+
+  const content = (
     <View style={styles.row}>
       <View style={styles.iconBox}>
         <Text style={styles.iconText}>{icon}</Text>
       </View>
-
       <View style={styles.textGroup}>
         <Text style={styles.title} numberOfLines={1}>
           {title}
@@ -35,7 +75,6 @@ export function TransactionItem({
           {subtitle}
         </Text>
       </View>
-
       <Text
         style={[
           styles.amount,
@@ -47,6 +86,19 @@ export function TransactionItem({
       </Text>
     </View>
   );
+
+  if (!onDelete) return content;
+
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={renderRightActions}
+      overshootRight={false}
+      rightThreshold={40}
+    >
+      {content}
+    </Swipeable>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -54,12 +106,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
-    backgroundColor: colors.white, // ya da daha da açık istersen "#FFFDFB" gibi sand'e çok yakın bir beyaz
+    backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.lg,
     padding: spacing.md,
-    marginBottom: spacing.sm, // kartlar arası boşluk
+    marginBottom: spacing.sm,
   },
   iconBox: {
     width: 44,
@@ -69,13 +121,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  iconText: {
-    fontSize: 20,
-  },
-  textGroup: {
-    flex: 1,
-    gap: 2,
-  },
+  iconText: { fontSize: 20 },
+  textGroup: { flex: 1, gap: 2 },
   title: {
     fontSize: typography.bodyLarge.fontSize,
     fontFamily: "PlusJakartaSans_600SemiBold",
@@ -89,5 +136,14 @@ const styles = StyleSheet.create({
   amount: {
     fontSize: typography.bodyLarge.fontSize,
     fontFamily: "PlusJakartaSans_700Bold",
+  },
+  deleteAction: {
+    backgroundColor: colors.terracotta,
+    justifyContent: "center",
+    alignItems: "center",
+    width: 64,
+    borderRadius: radius.lg,
+    marginBottom: spacing.sm,
+    marginLeft: spacing.sm,
   },
 });

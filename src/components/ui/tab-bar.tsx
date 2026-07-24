@@ -1,22 +1,19 @@
+import { useAddTransactionModal } from "@/app/context/add-transaction-modal-context";
 import { BottomTabInset, colors, radius, typography } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { usePathname, useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-interface CustomTabBarProps {
-  onAddPress: () => void;
-}
-
 const TABS = [
   { name: "index", label: "Ana Sayfa", icon: "home" as const },
   { name: "transactions", label: "İşlemler", icon: "swap-horizontal" as const },
   { name: "summary", label: "Özet", icon: "pie-chart" as const },
-  { name: "profile", label: "Profil", icon: "person" as const },
 ];
 
-export function CustomTabBar({ onAddPress }: CustomTabBarProps) {
+export function CustomTabBar() {
   const router = useRouter();
   const pathname = usePathname();
+  const { open } = useAddTransactionModal();
 
   return (
     <View style={[styles.wrapper, { paddingBottom: BottomTabInset / 3 }]}>
@@ -53,7 +50,7 @@ export function CustomTabBar({ onAddPress }: CustomTabBarProps) {
         })}
       </View>
 
-      <Pressable style={styles.fab} onPress={onAddPress}>
+      <Pressable style={styles.fab} onPress={open}>
         <Ionicons name="add" size={26} color={colors.white} />
       </Pressable>
     </View>
