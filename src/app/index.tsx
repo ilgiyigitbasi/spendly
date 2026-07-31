@@ -18,7 +18,6 @@ import {
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Button,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -134,18 +133,6 @@ export default function HomeScreen() {
             changePercent={undefined}
           />
         )}
-
-        <Button
-          title="Test bildirimi gönder"
-          onPress={async () => {
-            try {
-              const result = await api.testPushNotification();
-              console.log("Test push sonucu:", result);
-            } catch (error) {
-              console.log("Test push hatası:", error);
-            }
-          }}
-        />
 
         {!initialLoading && categoryData.length > 0 && (
           <>
