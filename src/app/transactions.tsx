@@ -50,9 +50,14 @@ export default function TransactionsScreen() {
   const load = useCallback(async () => {
     try {
       const res = await api.getTransactions();
-      setTransactions(res);
+
+      console.log("Transactions response:", res);
+
+      setTransactions(Array.isArray(res) ? res : []);
     } catch (err) {
       console.log("İşlemler veri hatası:", err);
+    } finally {
+      setInitialLoading(false);
     }
   }, []);
 
@@ -63,8 +68,10 @@ export default function TransactionsScreen() {
   );
 
   useEffect(() => {
-    if (refreshKey > 0) load();
-  }, [refreshKey]);
+    if (refreshKey > 0) {
+      load();
+    }
+  }, [refreshKey, load]);
 
   const filtered = useMemo(() => {
     return transactions.filter((tx) => {

@@ -1,3 +1,4 @@
+from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 load_dotenv()
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -23,8 +24,22 @@ app.include_router(auth_router.router)
 app.include_router(transactions_router.router)
 app.include_router(push_router.router)
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(send_daily_reminders, "cron", hour=20, minute=0)  # her gün saat 20:00 (UTC!)
+ISTANBUL_TZ = ZoneInfo("Europe/Istanbul")
+
+scheduler = BackgroundScheduler(
+    timezone=ISTANBUL_TZ,
+)
+
+scheduler.add_job(
+    send_daily_reminders,
+    trigger="cron",
+    hour="10,15,21",
+    minute=0,
+    id="daily_spend_reminders",
+    replace_existing=True,
+    coalesce=True,
+    misfire_grace_time=3600,
+)
 
 scheduler.start()
 
