@@ -1,4 +1,4 @@
-from backend.notifications import send_push
+from notifications import send_push
 from fastapi import APIRouter, Depends, HTTPException   
 from sqlalchemy.orm import Session
 from database import get_db
