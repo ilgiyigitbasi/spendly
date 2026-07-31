@@ -1,7 +1,7 @@
 import { useAddTransactionModal } from "@/app/context/add-transaction-modal-context";
 import { BottomTabInset, colors, radius, typography } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { usePathname, useRouter } from "expo-router";
+import { Href, usePathname, useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 const TABS = [
@@ -18,24 +18,27 @@ export function CustomTabBar() {
   return (
     <View style={[styles.wrapper, { paddingBottom: BottomTabInset / 3 }]}>
       <View style={styles.bar}>
-        {TABS.map((tab, i) => {
-          const isActive =
-            pathname === (tab.name === "index" ? "/" : `/${tab.name}`);
+        {TABS.map((tab) => {
+          const href = (tab.name === "index" ? "/" : `/${tab.name}`) as Href;
+
+          const isActive = pathname === href;
+
           return (
             <Pressable
               key={tab.name}
               style={styles.tabItem}
-              onPress={() =>
-                router.push(
-                  tab.name === "index" ? "/" : (("/" + tab.name) as any),
-                )
-              }
+              onPress={() => {
+                if (!isActive) {
+                  router.replace(href);
+                }
+              }}
             >
               <Ionicons
                 name={tab.icon}
                 size={22}
                 color={isActive ? colors.terracotta : colors.textMuted}
               />
+
               <Text
                 style={[
                   styles.tabLabel,
@@ -44,6 +47,7 @@ export function CustomTabBar() {
               >
                 {tab.label}
               </Text>
+
               {isActive && <View style={styles.dot} />}
             </Pressable>
           );

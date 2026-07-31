@@ -2,11 +2,12 @@ import AddTransactionSheet from "@/components/ui/add-transaction";
 import { SplashView } from "@/components/ui/splash-view";
 import { CustomTabBar } from "@/components/ui/tab-bar";
 import { colors } from "@/constants/theme";
+import { registerForPushNotifications } from "@/lib/notifications";
 import { useFonts } from "expo-font";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
@@ -16,13 +17,36 @@ import {
 import { AuthProvider, useAuth } from "./context/auth-context";
 import { TransactionsProvider } from "./context/transactions-context";
 
+SplashScreen.preventAutoHideAsync();
+
+SplashScreen.setOptions({
+  duration: 250,
+  fade: true,
+});
+
 function RootLayoutContent() {
-  const [addVisible, setAddVisible] = useState(false);
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const segments = useSegments();
   const [minSplashDone, setMinSplashDone] = useState(false);
   const { visible, close } = useAddTransactionModal();
+  const pushRegistrationStarted = useRef(false);
+
+  useEffect(() => {
+    if (loading || !isAuthenticated) {
+      return;
+    }
+
+    if (pushRegistrationStarted.current) {
+      return;
+    }
+
+    pushRegistrationStarted.current = true;
+
+    registerForPushNotifications().then((token) => {
+      console.log("Notification kayıt işlemi tamamlandı:", token);
+    });
+  }, [loading, isAuthenticated]);
 
   useEffect(() => {
     if (loading) return;
@@ -44,19 +68,29 @@ function RootLayoutContent() {
   });
 
   useEffect(() => {
+    if (isAuthenticated) {
+      registerForPushNotifications();
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
     const timer = setTimeout(() => setMinSplashDone(true), 1500);
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    if (fontsLoaded && minSplashDone) SplashScreen.hideAsync();
-  }, [fontsLoaded, minSplashDone]);
 
   if (!fontsLoaded || !minSplashDone || loading) return <SplashView />;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.sand }}>
-      <Stack screenOptions={{ headerShown: false, animation: "none" }} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "none",
+          contentStyle: {
+            backgroundColor: colors.sand,
+          },
+        }}
+      />
       {isAuthenticated && <CustomTabBar />}
 
       <Modal
@@ -85,9 +119,12 @@ function RootLayoutContent() {
 }
 
 export default function RootLayout() {
-  SplashScreen.preventAutoHideAsync();
+  const handleRootLayout = useCallback(() => {
+    void SplashScreen.hideAsync();
+  }, []);
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1 }} onLayout={handleRootLayout}>
       <AuthProvider>
         <TransactionsProvider>
           <AddTransactionModalProvider>

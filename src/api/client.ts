@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
-const API_BASE_URL = "http://172.20.10.2:8000";
+const API_BASE_URL = "https://spendly-js5n.onrender.com";
 
 const TOKEN_KEY = "spendly_token";
 
@@ -68,5 +68,10 @@ export const api = {
     request("/push/register", {
       method: "POST",
       body: JSON.stringify({ token }),
+    }),
+
+  testPushNotification: () =>
+    request("/push/test", {
+      method: "POST",
     }),
 };

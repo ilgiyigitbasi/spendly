@@ -3,6 +3,10 @@ import { BalanceCard } from "@/components/ui/balance-card";
 import { CategoryDonut } from "@/components/ui/category-donut";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Logo } from "@/components/ui/logo";
+import {
+  BalanceCardSkeleton,
+  TransactionListSkeleton,
+} from "@/components/ui/skeleton";
 import { TransactionItem } from "@/components/ui/transaction-item";
 import {
   BottomTabInset,
@@ -14,6 +18,7 @@ import {
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
+  Button,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -41,6 +46,7 @@ export default function HomeScreen() {
   } | null>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const { refreshKey } = useTransactionsRefresh();
 
   const load = useCallback(async () => {
@@ -49,10 +55,13 @@ export default function HomeScreen() {
         api.getBalance(),
         api.getTransactions(),
       ]);
+
       setBalance(balanceRes);
       setTransactions(txRes);
     } catch (err) {
       console.log("Ana sayfa veri hatası:", err);
+    } finally {
+      setInitialLoading(false);
     }
   }, []);
 
@@ -85,7 +94,7 @@ export default function HomeScreen() {
 
   function colorForIndex(i: number) {
     if (i < CHART_PALETTE.length) return CHART_PALETTE[i];
-    // palet taşarsa altın açı (golden angle) ile otomatik, birbirinden uzak tonlar üret
+
     const hue = (i * 137.5) % 360;
     return `hsl(${hue}, 55%, 55%)`;
   }
@@ -117,12 +126,28 @@ export default function HomeScreen() {
           <Logo size="small" />
         </View>
 
-        <BalanceCard
-          balance={balance?.balance ?? 0}
-          changePercent={undefined}
+        {initialLoading ? (
+          <BalanceCardSkeleton />
+        ) : (
+          <BalanceCard
+            balance={balance?.balance ?? 0}
+            changePercent={undefined}
+          />
+        )}
+
+        <Button
+          title="Test bildirimi gönder"
+          onPress={async () => {
+            try {
+              const result = await api.testPushNotification();
+              console.log("Test push sonucu:", result);
+            } catch (error) {
+              console.log("Test push hatası:", error);
+            }
+          }}
         />
 
-        {categoryData.length > 0 && (
+        {!initialLoading && categoryData.length > 0 && (
           <>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Kategori Dağılımı</Text>
@@ -137,7 +162,9 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>Harcamalar</Text>
         </View>
 
-        {transactions.length === 0 ? (
+        {initialLoading ? (
+          <TransactionListSkeleton count={5} />
+        ) : transactions.length === 0 ? (
           <EmptyState
             title="Henüz işlem yok"
             subtitle="Başlamak için bakiye kartına dokun"

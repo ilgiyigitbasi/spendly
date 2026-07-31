@@ -2,24 +2,25 @@ import { api } from "@/api/client";
 import { Chip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Logo } from "@/components/ui/logo";
+import { TransactionListSkeleton } from "@/components/ui/skeleton";
 import { TransactionItem } from "@/components/ui/transaction-item";
 import {
-    BottomTabInset,
-    colors,
-    radius,
-    spacing,
-    typography,
+  BottomTabInset,
+  colors,
+  radius,
+  spacing,
+  typography,
 } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTransactionsRefresh } from "./context/transactions-context";
@@ -43,6 +44,7 @@ export default function TransactionsScreen() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("Tümü");
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [initialLoading, setInitialLoading] = useState(true);
   const { refreshKey, bump } = useTransactionsRefresh();
 
   const load = useCallback(async () => {
@@ -126,7 +128,9 @@ export default function TransactionsScreen() {
           ))}
         </View>
 
-        {filtered.length === 0 ? (
+        {initialLoading ? (
+          <TransactionListSkeleton count={7} />
+        ) : filtered.length === 0 ? (
           <EmptyState
             title="İşlem bulunamadı"
             subtitle="Aramanıza veya filtrelerinize uyan işlem yok"

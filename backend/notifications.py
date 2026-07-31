@@ -7,12 +7,43 @@ from models import User, Transaction, PushToken
 EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send"
 
 
-def send_push(tokens: list[str], title: str, body: str):
+def send_push(
+    tokens: list[str],
+    title: str,
+    body: str,
+):
     if not tokens:
-        return
-    messages = [{"to": t, "title": title, "body": body, "sound": "default"} for t in tokens]
-    with httpx.Client() as client:
-        client.post(EXPO_PUSH_URL, json=messages, headers={"Content-Type": "application/json"})
+        print("Push gönderilmedi: kayıtlı token yok.")
+        return []
+
+    messages = [
+        {
+            "to": token,
+            "title": title,
+            "body": body,
+            "sound": "default",
+            "channelId": "default",
+            "priority": "high",
+        }
+        for token in tokens
+    ]
+
+    with httpx.Client(timeout=15.0) as client:
+        response = client.post(
+            EXPO_PUSH_URL,
+            json=messages,
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+        )
+
+        print("Expo HTTP status:", response.status_code)
+        print("Expo push response:", response.text)
+
+        response.raise_for_status()
+
+        return response.json()
 
 
 def send_daily_reminders():
